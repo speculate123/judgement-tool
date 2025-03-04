@@ -1,0 +1,155 @@
+<!--
+  ~ Copyright (c) 2025 LY Corporation. All rights reserved.
+  ~ LY Corporation PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search</title>
+</head>
+
+<style>
+    #judgement {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    #judgement td, #judgement th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    #judgement tr:nth-child(even){background-color: #f2f2f2;}
+
+    #judgement tr:hover {background-color: #ddd;}
+
+    #judgement th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #04AA6D;
+        color: white;
+    }
+
+    button {
+        width: 200px;
+    }
+</style>
+
+<body>
+    <h1>Search</h1>
+    Query: <input type="text" id="query" name="query"> <br> <br>
+    Page: <input type="number" id="page" name="page"> <br> <br>
+    Size: <input type="number" id="size" name="size"> <br> <br>
+    <button id="search">Search</button>
+    <button id="copy">Copy</button>
+    <br><br>
+    <button id="select">Select All</button>
+    <button id="selectNotPdf">Select All(Skip Pdf)</button>
+    <button id="deselect">Deselect All</button>
+    <br> <br>
+    <div>
+      <table id="judgement"></table>
+    </div>
+</body>
+</html>
+
+<script>
+    document.getElementById("search").addEventListener("click", function() {
+        var query = document.getElementById("query").value;
+        var page = document.getElementById("page").value;
+        var size = document.getElementById("size").value;
+        var url = "http://localhost:8080/query?query=" + query + "&page=" + page + "&size=" + size;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                var table = document.getElementById("judgement");
+                table.innerHTML = "";
+                for (var i = 0; i < data.length; i++) {
+                    var tr = document.createElement("tr");
+
+                    // check button
+                    var td0 = document.createElement("td");
+                    td0.style.width = "5%";
+                    var check = document.createElement("input");
+                    check.type = "checkbox";
+                    check.id = "check" + i;
+                    td0.appendChild(check);
+
+                    var td1 = document.createElement("td");
+                    td1.style.width = "25%";
+                    if (data[i].filePath != null) {
+                        var title = document.createElement("a");
+                        title.href = data[i].filePath;
+                        title.innerHTML = data[i].title;
+                        td1.appendChild(title);
+                    } else {
+                        td1.innerHTML = data[i].title;
+                    }
+
+                    var td2 = document.createElement("td");
+                    td2.style.width = "70%";
+                    var detail = document.createElement("details");
+                    var summary = document.createElement("summary");
+                    summary.innerHTML = data[i].content.substring(0, 300);
+                    detail.appendChild(summary);
+                    var p = document.createElement("p");
+                    p.innerHTML = data[i].content;
+                    detail.appendChild(p);
+                    td2.appendChild(detail);
+
+                    tr.appendChild(td0);
+                    tr.appendChild(td1);
+                    tr.appendChild(td2);
+                    table.appendChild(tr);
+                }
+            });
+    });
+
+    document.getElementById("copy").addEventListener("click", function() {
+        var table = document.getElementById("judgement");
+        var result = "";
+        for (var i = 0; i < table.rows.length; i++) {
+            var check = document.getElementById("check" + i);
+            if (check.checked) {
+                var content = table.rows[i].cells[2].getElementsByTagName("p")[0].innerHTML;
+                result += content + "\n\n";
+            }
+        }
+        navigator.clipboard.writeText(result);
+    });
+
+    document.getElementById("select").addEventListener("click", function() {
+        var table = document.getElementById("judgement");
+        for (var i = 0; i < table.rows.length; i++) {
+            var check = document.getElementById("check" + i);
+            check.checked = true;
+        }
+    });
+
+    document.getElementById("selectNotPdf").addEventListener("click", function() {
+        var table = document.getElementById("judgement");
+        for (var i = 0; i < table.rows.length; i++) {
+            var check = document.getElementById("check" + i);
+            var title = table.rows[i].cells[1].innerHTML;
+            console.log(title);
+            if (!title.includes(".pdf")) {
+                check.checked = true;
+            }
+        }
+    });
+
+    document.getElementById("deselect").addEventListener("click", function() {
+        var table = document.getElementById("judgement");
+        for (var i = 0; i < table.rows.length; i++) {
+            var check = document.getElementById("check" + i);
+            check.checked = false;
+        }
+    });
+</script>
+
+
+

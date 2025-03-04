@@ -1,0 +1,7 @@
+elasticsearch:
+    rest:
+        username: elastic
+        password: BZyFqsAGJZUkjpYe34L4
+        ssl: 7209e52e961ffbfaf07ffc0c994914f354a471a817b0110d92f3bb645a038beb
+data:
+    path: /Users/jeff_tseng/Documents/jeff-law/java/src/main/resources/data
